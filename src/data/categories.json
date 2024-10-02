@@ -1,0 +1,27 @@
+[
+    {
+        "id": "1",
+        "name": "Astrologer",
+        "icon": "post"
+    },
+    {
+        "id": "2",
+        "name": "Assistant",
+        "icon": "rocket"
+    },
+    {
+        "id": "3",
+        "name": "Makeup",
+        "icon": "verify"
+    },
+    {
+        "id": "4",
+        "name": "Mehndi",
+        "icon": "post"
+    },
+    {
+        "id": "5",
+        "name": "Photogra",
+        "icon": "rocket"
+    }
+]

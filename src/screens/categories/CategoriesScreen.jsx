@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
     SafeAreaView,
     StyleSheet,
@@ -18,214 +18,102 @@ import {
 } from '../../components/Pixel/Index';
 import { COLORS } from '../../../constants';
 import fontFamily from '../../../constants/fontFamily';
+import FastImage from 'react-native-fast-image';
 
-const categories = [
-    { id: '1', name: 'Astrologer', icon: require('../../../assets/images/post.png') },
-    { id: '2', name: 'Assistant', icon: require('../../../assets/images/rocket.png') },
-    { id: '3', name: 'Makeup', icon: require('../../../assets/images/verify.png') },
-    { id: '4', name: 'Mehndi', icon: require('../../../assets/images/post.png') },
-    { id: '5', name: 'Photogra', icon: require('../../../assets/images/rocket.png') },
-];
+// Import data from JSON files
+import categoriesData from '../../data/categories.json';
+import workersData from '../../data/workers.json';
 
-const workers = [
-    {
-        id: '1',
-        name: 'Arthur',
-        country: 'France',
-        flag: require('../../../assets/flags/france.png'),
-        profileImage: require('../../../assets/images/user.jpg'),
-        categoryId: '1',
-    },
-    {
-        id: '2',
-        name: 'Leslie',
-        country: 'Germany',
-        flag: require('../../../assets/flags/germany.png'),
-        profileImage: require('../../../assets/images/user1.jpg'),
-        categoryId: '2',
-    },
-    {
-        id: '3',
-        name: 'Sophia',
-        country: 'Spain',
-        flag: require('../../../assets/flags/spain.png'),
-        profileImage: require('../../../assets/images/user4.jpg'),
-        categoryId: '3',
-    },
-    {
-        id: '4',
-        name: 'Liam',
-        country: 'United States',
-        flag: require('../../../assets/flags/italy.png'),
-        profileImage: require('../../../assets/images/user.jpg'),
-        categoryId: '4',
-    },
-    {
-        id: '5',
-        name: 'Emma',
-        country: 'Italy',
-        flag: require('../../../assets/flags/italy.png'),
-        profileImage: require('../../../assets/images/user1.jpg'),
-        categoryId: '5',
-    },
-    {
-        id: '6',
-        name: 'Lucas',
-        country: 'Brazil',
-        flag: require('../../../assets/flags/serbia.png'),
-        profileImage: require('../../../assets/images/user4.jpg'),
-        categoryId: '1',
-    },
-    {
-        id: '7',
-        name: 'Noah',
-        country: 'Netherlands',
-        flag: require('../../../assets/flags/netharlands.png'),
-        profileImage: require('../../../assets/images/user.jpg'),
-        categoryId: '2',
-    },
-    {
-        id: '8',
-        name: 'Olivia',
-        country: 'United Kingdom',
-        flag: require('../../../assets/flags/portugal.png'),
-        profileImage: require('../../../assets/images/user1.jpg'),
-        categoryId: '3',
-    },
-    {
-        id: '9',
-        name: 'Mia',
-        country: 'Canada',
-        flag: require('../../../assets/flags/hungary.png'),
-        profileImage: require('../../../assets/images/user4.jpg'),
-        categoryId: '4',
-    },
-    {
-        id: '10',
-        name: 'Elijah',
-        country: 'South Africa',
-        flag: require('../../../assets/flags/saudi-arabia.png'),
-        profileImage: require('../../../assets/images/user.jpg'),
-        categoryId: '5',
-    },
-    {
-        id: '11',
-        name: 'Sophia',
-        country: 'Australia',
-        flag: require('../../../assets/flags/serbia.png'),
-        profileImage: require('../../../assets/images/user1.jpg'),
-        categoryId: '1',
-    },
-    {
-        id: '12',
-        name: 'James',
-        country: 'New Zealand',
-        flag: require('../../../assets/flags/russia.png'),
-        profileImage: require('../../../assets/images/user4.jpg'),
-        categoryId: '2',
-    },
-    {
-        id: '13',
-        name: 'Isabella',
-        country: 'Japan',
-        flag: require('../../../assets/flags/france.png'),
-        profileImage: require('../../../assets/images/user.jpg'),
-        categoryId: '3',
-    },
-    {
-        id: '14',
-        name: 'Henry',
-        country: 'Germany',
-        flag: require('../../../assets/flags/germany.png'),
-        profileImage: require('../../../assets/images/user1.jpg'),
-        categoryId: '4',
-    },
-    {
-        id: '15',
-        name: 'Oliver',
-        country: 'France',
-        flag: require('../../../assets/flags/france.png'),
-        profileImage: require('../../../assets/images/user4.jpg'),
-        categoryId: '5',
-    },
-    {
-        id: '16',
-        name: 'Emily',
-        country: 'Mexico',
-        flag: require('../../../assets/flags/germany.png'),
-        profileImage: require('../../../assets/images/user.jpg'),
-        categoryId: '1',
-    },
-    {
-        id: '17',
-        name: 'Charlotte',
-        country: 'South Korea',
-        flag: require('../../../assets/flags/russia.png'),
-        profileImage: require('../../../assets/images/user1.jpg'),
-        categoryId: '2',
-    },
-    {
-        id: '18',
-        name: 'Amelia',
-        country: 'Switzerland',
-        flag: require('../../../assets/flags/spain.png'),
-        profileImage: require('../../../assets/images/user4.jpg'),
-        categoryId: '3',
-    },
-    {
-        id: '19',
-        name: 'William',
-        country: 'Argentina',
-        flag: require('../../../assets/flags/united-states.png'),
-        profileImage: require('../../../assets/images/user.jpg'),
-        categoryId: '4',
-    },
-    {
-        id: '20',
-        name: 'Mike',
-        country: 'Argentina',
-        flag: require('../../../assets/flags/united-states.png'),
-        profileImage: require('../../../assets/images/user4.jpg'),
-        categoryId: '5',
-    },
-];
+// Asset Mappings
+const icons = {
+    post: require('../../../assets/images/post.png'),
+    rocket: require('../../../assets/images/rocket.png'),
+    verify: require('../../../assets/images/verify.png'),
+};
 
+const profileImages = {
+    user: require('../../../assets/images/user.jpg'),
+    user1: require('../../../assets/images/user1.jpg'),
+    user4: require('../../../assets/images/user4.jpg'),
+};
+
+const flags = {
+    france: require('../../../assets/flags/france.png'),
+    germany: require('../../../assets/flags/germany.png'),
+    spain: require('../../../assets/flags/spain.png'),
+    italy: require('../../../assets/flags/italy.png'),
+    netharlands: require('../../../assets/flags/netharlands.png'),
+    serbia: require('../../../assets/flags/serbia.png'),
+    hungary: require('../../../assets/flags/hungary.png'),
+    portugal: require('../../../assets/flags/portugal.png'),
+    russia: require('../../../assets/flags/russia.png'),
+    saudi: require('../../../assets/flags/saudi-arabia.png'),
+    turkey: require('../../../assets/flags/turkey.png'),
+    uk: require('../../../assets/flags/united-states.png'),
+};
+
+const debounce = (func, delay) => {
+    let timeoutId;
+    return function (...args) {
+        if (timeoutId) clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => {
+            func.apply(this, args);
+        }, delay);
+    };
+};
 
 const CategoriesScreen = () => {
     const [searchText, setSearchText] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(null);
+    const [categories] = useState(categoriesData);
+    const [workers] = useState(workersData);
+    const [loading, setLoading] = useState(false);
 
     // Function to handle category selection
-    const handleCategorySelect = (categoryId) => {
+    const handleCategorySelect = useCallback((categoryId) => {
         setSelectedCategory(prevCategory => (prevCategory === categoryId ? null : categoryId));
-    };
+    }, []);
 
-    // Filter workers based on selected category and search text
-    const filteredWorkers = workers.filter(worker => {
-        const matchesCategory = !selectedCategory || worker.categoryId === selectedCategory;
-        const matchesSearch = worker.name.toLowerCase().includes(searchText.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    // Debounced search update
+    const updateSearchText = useCallback(
+        debounce((text) => {
+            setSearchText(text);
+        }, 300),
+        []
+    );
 
-    const renderCategoryItem = ({ item }) => (
+    // Memoize the filtered workers
+    const filteredWorkers = useMemo(() => {
+        return workers.filter(worker => {
+            const matchesCategory = !selectedCategory || worker.categoryId === selectedCategory;
+            const matchesSearch = worker.name.toLowerCase().includes(searchText.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [workers, selectedCategory, searchText]);
+
+    // Memoized rendering function for category items
+    const renderCategoryItem = useCallback(({ item }) => (
         <TouchableOpacity
             style={[styles.categoryItem, selectedCategory === item.id && styles.selectedCategory]}
             onPress={() => handleCategorySelect(item.id)}
         >
-            <Image source={item.icon} style={styles.categoryIcon} />
+            <View style={{ backgroundColor: COLORS.white, padding: wp(1), borderRadius: wp(17) }}>
+                <FastImage source={icons[item.icon]} style={styles.categoryIcon} />
+            </View>
             <Text style={styles.categoryText}>{item.name}</Text>
         </TouchableOpacity>
-    );
+    ), [selectedCategory]);
 
-    const renderWorkerItem = ({ item }) => (
+    // Memoized rendering function for worker items
+    const renderWorkerItem = useCallback(({ item }) => (
         <View style={styles.workerItem}>
             <View style={styles.imageContainer}>
-                <Image source={item.profileImage} style={styles.profileImage} />
-                <Image source={item.flag} style={styles.flagIcon} />
+                <FastImage source={profileImages[item.profileImage]} style={styles.profileImage} />
+                <FastImage source={flags[item.flag]} style={styles.flagIcon} />
             </View>
             <Text style={styles.workerName}>{item.name}</Text>
         </View>
-    );
+    ), []);
 
     return (
         <SafeAreaView style={styles.container}>
@@ -256,8 +144,7 @@ const CategoriesScreen = () => {
                     <TextInput
                         placeholder="Search"
                         placeholderTextColor={COLORS.darkgray1}
-                        value={searchText}
-                        onChangeText={setSearchText}
+                        onChangeText={updateSearchText}
                         style={styles.searchInput}
                     />
                     <TouchableOpacity style={styles.microphoneIcon}>
@@ -274,6 +161,9 @@ const CategoriesScreen = () => {
                     renderItem={renderWorkerItem}
                     keyExtractor={item => item.id}
                     numColumns={4}
+                    initialNumToRender={10}
+                    maxToRenderPerBatch={5}
+                    windowSize={5}
                     contentContainerStyle={styles.workersGrid}
                 />
             </View>
@@ -281,7 +171,7 @@ const CategoriesScreen = () => {
     );
 };
 
-export default CategoriesScreen;
+export default React.memo(CategoriesScreen);
 
 const styles = StyleSheet.create({
     container: {
@@ -303,12 +193,12 @@ const styles = StyleSheet.create({
     },
     categoryItem: {
         alignItems: 'center',
-        paddingHorizontal: wp(1.4),
+        paddingHorizontal: wp(1),
     },
     categoryIcon: {
-        width: wp(17),
-        height: wp(17),
-        borderRadius: wp(17),
+        width: wp(16),
+        height: wp(16),
+        borderRadius: wp(16),
     },
     categoryText: {
         marginTop: hp(0.5),
