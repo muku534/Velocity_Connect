@@ -52,6 +52,11 @@ yarn-error.log
 **/fastlane/screenshots
 **/fastlane/test_output
 
+.env
+.env.local
+my-release-key.jks
+my-release-key.keystore
+
 # Bundle artifact
 *.jsbundle
 
